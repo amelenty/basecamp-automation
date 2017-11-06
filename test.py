@@ -1,3 +1,4 @@
+import pytest
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 
@@ -21,10 +22,21 @@ def runtestcase(key, driver):
     assert driver.find_element_by_id("resultsbox").get_attribute('value') == testcases[key]
     myclick('C', driver)
 
-browser = webdriver.Chrome()
-browser.get('file:///C:/Users/ada.melentyeva/Documents/BaseCamp/Automation/calc.html')
+@pytest.fixture(scope="module")
+def chrome(request):
+    testcases = {
+        '19+35' : '54',
+        '77*13' : '1001',
+        '95/20' : '4.75',
+        '20-32' : '-12'
+    }
+    browser = webdriver.Chrome()
+    browser.get('file:///C:/Users/ada.melentyeva/Documents/BaseCamp/Automation/calc.html')
+    def fin():
+        browser.quit()
+    request.addfinalizer(fin)
+    return browser
 
-for testcase in testcases:
-    runtestcase(testcase, browser)
-
-browser.quit()
+def test_basic_math(chrome):
+    for testcase in testcases:
+        runtestcase(testcase, chrome)
